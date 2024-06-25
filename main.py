@@ -13,7 +13,7 @@ TOKEN = '7272910298:AAFFNc7MqBl-TXDOWK9fXTABwlhCM1_DVuc'
 bot = telebot.TeleBot(TOKEN)
 
 # Словарь для хранения данных пользователей
-users = defaultdict(lambda: {'income': 1, 'referrals': {}, 'staked': 0, 'total_referral_income': 0, 'last_subscription_check': 0, 'last_daily_report': 0})
+users = defaultdict(lambda: {'income': 1, 'referrals': {}, 'staked': 0, 'total_referral_income': 0, 'last_subscription_check': 0})
 
 # Канал для подписки
 CHANNEL_USERNAME = 'darkice_proj'
@@ -99,11 +99,11 @@ def show_dashboard(chat_id):
 def get_subscription_reward(chat_id):
     if is_user_subscribed(chat_id):
         last_check = users[chat_id]['last_subscription_check']
-        time_since_last_check = message.date - last_check
+        time_since_last_check = time.time() - last_check
         
         if time_since_last_check >= CHECK_INTERVAL:
             users[chat_id]['income'] += SUBSCRIPTION_REWARD
-            users[chat_id]['last_subscription_check'] = message.date
+            users[chat_id]['last_subscription_check'] = time.time()
             bot.send_message(chat_id, f"Вы получили {SUBSCRIPTION_REWARD} $Daice за подписку на канал!")
         else:
             time_remaining = CHECK_INTERVAL - time_since_last_check
@@ -185,31 +185,12 @@ def do_staking(message):
 
 def show_referral_link(chat_id):
     # Вывод реферальной ссылки
-    ref_link = f"https://t.me/daiceproj_bot?start={chat_id}"
+    ref_link = f"https://t.me/darkiceproj_bot?start={chat_id}"
     bot.send_message(chat_id, f"Ваша реферальная ссылка: {ref_link}")
 
-# Функция для ежедневной рассылки
-def send_daily_report():
-    for chat_id in users:
-        last_report = users[chat_id]['last_daily_report']
-        time_since_last_report = time.time() - last_report
-        
-        if time_since_last_report >= CHECK_INTERVAL:
-            daily_income = users[chat_id]['income'] - (users[chat_id]['staked'] * 0.05)
-            daily_report = f"Заберите ежедневный бонус!\n\n"
-            daily_report += f"Ваш доход за последние 24 часа:\n"
-            daily_report += f"- Доход от рефералов: {users[chat_id]['total_referral_income']} $Daice\n"
-            daily_report += f"- Доход от стейкинга: {users[chat_id]['staked'] * 0.05} $Daice\n"
-            daily_report += f"- Итого: {daily_income} $Daice\n\n"
-            daily_report += f"И это еще не рекорд!"
-            
-            bot.send_message(chat_id, daily_report)
-            users[chat_id]['last_daily_report'] = time.time()
-
-# Запуск бота и ежедневной рассылки
+# Запуск бота
 while True:
     try:
-        send_daily_report()
         bot.polling(none_stop=True)
     except Exception as e:
         print(f"Ошибка: {e}")
