@@ -185,7 +185,7 @@ def do_staking(message):
 
 def show_referral_link(chat_id):
     # Вывод реферальной ссылки
-    ref_link = f"https://t.me/darkiceproj_bot?start={chat_id}"
+    ref_link = f"https://t.me/daiceproj_bot?start={chat_id}"
     bot.send_message(chat_id, f"Ваша реферальная ссылка: {ref_link}")
 
 # Запуск бота
