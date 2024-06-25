@@ -3,7 +3,7 @@ from telebot import types
 from collections import defaultdict
 
 # Токен бота
-TOKEN = 'YOUR_BOT_TOKEN'
+TOKEN = '7205134080:AAElGKDakWGR3upcttIiDytEt5XVFvPC2s4'
 
 # Создание экземпляра бота
 bot = telebot.TeleBot(TOKEN)
@@ -55,7 +55,7 @@ def show_profile(chat_id):
 
 def show_referral_link(chat_id):
     # Вывод реферальной ссылки
-    ref_link = f"https://t.me/YourBotName?start={chat_id}"
+    ref_link = f"https://t.me/coincone_bot?start={chat_id}"
     bot.send_message(chat_id, f"Ваша реферальная ссылка: {ref_link}")
 
 def process_staking(chat_id):
