@@ -1,3 +1,6 @@
+Вот полный код бота с исправленными ошибками и оптимизацией:
+
+```python
 import telebot
 from telebot import types
 from collections import defaultdict
@@ -110,7 +113,7 @@ def handle_text(message):
         show_dashboard(chat_id)
     
     elif text == "Leaderboard" or text == "Таблица лидеров":
-        show_leaderboard()
+        show_leaderboard(chat_id)
     
     elif text == "Admin panel" or text == "Админ панель":
         if str(chat_id) in admins:
@@ -269,11 +272,11 @@ def add_referral(chat_id, ref_code):
     # Приветственное сообщение для реферала
     bot.send_message(chat_id, f"You have successfully joined the Dark Ice Project referral program! Your income: {users[chat_id]['income']} $Daice per hour." if users[chat_id]['username'] else f"Вы успешно присоединились к реферальной программе Dark Ice Project! Ваш доход: {users[chat_id]['income']} $Daice в час.")
 
-def show_leaderboard():
+def show_leaderboard(chat_id):
     # Получение списка пользователей, отсортированных по количеству рефералов
     leaderboard = sorted(users.items(), key=lambda x: sum(len(level) for level in x[1]['referrals'].values()), reverse=True)[:100]
     
     # Формирование сообщения с таблицей лидеров
     leaderboard_msg = "Dark Ice Project Leaderboard:\n\n" if users[chat_id]['username'] else "Таблица лидеров Dark Ice Project:\n\n"
     leaderboard_msg += "Place | Username | Referrals\n" if users[chat_id]['username'] else "Место | Пользователь | Количество рефералов\n"
-    leaderboard_msg += "-" * 50 + "\n"
+    leaderboard_msg += "-" *
