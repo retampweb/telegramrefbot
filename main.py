@@ -30,17 +30,16 @@ def start(message):
     
     # Создание клавиатуры
     markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
-    btn1 = types.KeyboardButton("Профиль")
-    btn2 = types.KeyboardButton("Реферальная программа")
-    btn3 = types.KeyboardButton("Стейкинг")
-    btn4 = types.KeyboardButton("Личный кабинет")
-    btn5 = types.KeyboardButton("Получить монеты")
-    markup.add(btn1, btn2, btn3, btn4, btn5)
+    btn1 = types.KeyboardButton("Реферальная программа")
+    btn2 = types.KeyboardButton("Стейкинг")
+    btn3 = types.KeyboardButton("Личный кабинет")
+    btn4 = types.KeyboardButton("Получить монеты")
+    markup.add(btn1, btn2, btn3, btn4)
     
     # Приветственное сообщение
     welcome_message = "Добро пожаловать в Dark Ice Project!\n\n"
     welcome_message += "Dark Ice - это децентрализованная валюта, основанная на сети TON. Наше сообщество стремится к справедливому распределению заработка.\n\n"
-    welcome_message += "Каждый реферал, которого вы приведете, будет зарабатывать больше, привлекая новых участников сети. Мы используем сложный процент и 24-уровневую систему приглашений.\n\n"
+    welcome_message += "Каждый реферал, которого вы приведете, будет зарабатывать больше, привлекая новых рефералов. Мы используем сложный процент и 24-уровневую систему рефералов.\n\n"
     welcome_message += "Выберите действие:"
     bot.send_message(chat_id, welcome_message, reply_markup=markup)
     
@@ -55,10 +54,7 @@ def handle_text(message):
     chat_id = message.chat.id
     text = message.text
     
-    if text == "Профиль":
-        show_profile(chat_id)
-    
-    elif text == "Реферальная программа":
+    if text == "Реферальная программа":
         show_referral_link(chat_id)
     
     elif text == "Стейкинг":
@@ -69,13 +65,6 @@ def handle_text(message):
     
     elif text == "Получить монеты":
         get_subscription_reward(chat_id)
-
-def show_profile(chat_id):
-    # Вывод информации о профиле пользователя
-    profile_info = f"Ваш доход: {users[chat_id]['income']} $Daice в час\n"
-    profile_info += f"Количество рефералов: {sum(len(level) for level in users[chat_id]['referrals'].values())}\n"
-    profile_info += f"Заблокировано монет: {users[chat_id]['staked']} $Daice"
-    bot.send_message(chat_id, profile_info)
 
 def show_dashboard(chat_id):
     # Вывод информации о личном кабинете
@@ -96,7 +85,7 @@ def show_dashboard(chat_id):
             time_remaining = CHECK_INTERVAL - time_since_last_check
             dashboard_info += f"Вы сможете получить {SUBSCRIPTION_REWARD} $Daice через {format_time(time_remaining)} за подписку на канал."
     else:
-        dashboard_info += f"Подпишитесь на @{CHANNEL_USERNAME}, чтобы получать {SUBSCRIPTION_REWARD} $Daice!"
+        dashboard_info += f"Подпишитесь на {CHANNEL_USERNAME}, чтобы получать {SUBSCRIPTION_REWARD} $Daice!"
     
     bot.send_message(chat_id, dashboard_info)
 
@@ -113,7 +102,7 @@ def get_subscription_reward(chat_id):
             time_remaining = CHECK_INTERVAL - time_since_last_check
             bot.send_message(chat_id, f"Вы сможете получить еще {SUBSCRIPTION_REWARD} $Daice через {format_time(time_remaining)} за подписку на канал.")
     else:
-        bot.send_message(chat_id, f"Подпишитесь на @{CHANNEL_USERNAME}, чтобы получать {SUBSCRIPTION_REWARD} $Daice!")
+        bot.send_message(chat_id, f"Подпишитесь на {CHANNEL_USERNAME}, чтобы получать {SUBSCRIPTION_REWARD} $Daice!")
 
 def is_user_subscribed(chat_id):
     try:
@@ -159,6 +148,10 @@ def add_referral(chat_id, ref_code):
     
     # Приветственное сообщение для реферала
     bot.send_message(chat_id, f"Вы успешно присоединились к реферальной программе Dark Ice Project! Ваш доход: {users[chat_id]['income']} $Daice в час.")
+    
+    # Сообщение для реферера о новом реферале
+    ref_count = sum(len(level) for level in users[ref_code]['referrals'].values())
+    bot.send_message(ref_code, f"Поздравляем! У вас появился новый реферал. Теперь у вас {ref_count} рефералов.")
 
 def process_staking(chat_id):
     # Обработка стейкинга монет
