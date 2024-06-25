@@ -6,7 +6,7 @@ import time
 import requests
 
 # Токен бота
-TOKEN = '7272910298:AAFFNc7MqBl-TXDOWK9fXTABwlhCM1_DVuc'
+TOKEN = 'YOUR_BOT_TOKEN'
 
 # Создание экземпляра бота
 bot = telebot.TeleBot(TOKEN)
@@ -30,12 +30,11 @@ def start(message):
     
     # Создание клавиатуры
     markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
-    btn1 = types.KeyboardButton("Профиль")
-    btn2 = types.KeyboardButton("Реферальная программа")
-    btn3 = types.KeyboardButton("Стейкинг")
-    btn4 = types.KeyboardButton("Личный кабинет")
-    btn5 = types.KeyboardButton("Получить монеты")
-    markup.add(btn1, btn2, btn3, btn4, btn5)
+    btn1 = types.KeyboardButton("Реферальная программа")
+    btn2 = types.KeyboardButton("Стейкинг")
+    btn3 = types.KeyboardButton("Личный кабинет")
+    btn4 = types.KeyboardButton("Получить монеты")
+    markup.add(btn1, btn2, btn3, btn4)
     
     # Приветственное сообщение
     bot.send_message(chat_id, "Добро пожаловать! Выберите действие:", reply_markup=markup)
@@ -51,10 +50,7 @@ def handle_text(message):
     chat_id = message.chat.id
     text = message.text
     
-    if text == "Профиль":
-        show_profile(chat_id)
-    
-    elif text == "Реферальная программа":
+    if text == "Реферальная программа":
         show_referral_link(chat_id)
     
     elif text == "Стейкинг":
@@ -66,19 +62,13 @@ def handle_text(message):
     elif text == "Получить монеты":
         get_subscription_reward(chat_id)
 
-def show_profile(chat_id):
-    # Вывод информации о профиле пользователя
-    profile_info = f"Ваш доход: {users[chat_id]['income']} $Daice в час\n"
-    profile_info += f"Количество рефералов: {sum(len(level) for level in users[chat_id]['referrals'].values())}\n"
-    profile_info += f"Заблокировано монет: {users[chat_id]['staked']} $Daice"
-    bot.send_message(chat_id, profile_info)
-
 def show_dashboard(chat_id):
     # Вывод информации о личном кабинете
     dashboard_info = f"Ваш баланс: {users[chat_id]['income']} $Daice\n"
     dashboard_info += f"Заблокировано монет: {users[chat_id]['staked']} $Daice\n"
     dashboard_info += f"Доход от рефералов: {users[chat_id]['total_referral_income']} $Daice\n"
-    dashboard_info += f"Ежедневный доход от стейкинга: {users[chat_id]['staked'] * 0.05} $Daice\n\n"
+    dashboard_info += f"Ежедневный доход от стейкинга: {users[chat_id]['staked'] * 0.05} $Daice\n"
+    dashboard_info += f"Количество рефералов: {sum(len(level) for level in users[chat_id]['referrals'].values())}\n\n"
     
     # Проверка подписки на канал
     if is_user_subscribed(chat_id):
@@ -108,7 +98,7 @@ def get_subscription_reward(chat_id):
             time_remaining = CHECK_INTERVAL - time_since_last_check
             bot.send_message(chat_id, f"Вы сможете получить еще {SUBSCRIPTION_REWARD} $Daice через {format_time(time_remaining)} за подписку на канал.")
     else:
-        bot.send_message(chat_id, f"Подпишитесь на @{CHANNEL_USERNAME}, чтобы получать {SUBSCRIPTION_REWARD} $Daice!")
+        bot.send_message(chat_id, f"Подпишитесь на {CHANNEL_USERNAME}, чтобы получать {SUBSCRIPTION_REWARD} $Daice!")
 
 def is_user_subscribed(chat_id):
     try:
@@ -180,7 +170,7 @@ def do_staking(message):
 
 def show_referral_link(chat_id):
     # Вывод реферальной ссылки
-    ref_link = f"https://t.me/daiceproj_bot?start={chat_id}"
+    ref_link = f"https://t.me/YourBotName?start={chat_id}"
     bot.send_message(chat_id, f"Ваша реферальная ссылка: {ref_link}")
 
 # Запуск бота
