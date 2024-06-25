@@ -3,7 +3,7 @@ from telebot import types
 from collections import defaultdict
 from operator import itemgetter
 import time
-from telegram import Chat, ChatMember, ChatMemberStatus
+import requests
 
 # Токен бота
 TOKEN = '7272910298:AAFFNc7MqBl-TXDOWK9fXTABwlhCM1_DVuc'
@@ -108,12 +108,13 @@ def get_subscription_reward(chat_id):
             time_remaining = CHECK_INTERVAL - time_since_last_check
             bot.send_message(chat_id, f"Вы сможете получить еще {SUBSCRIPTION_REWARD} $Daice через {format_time(time_remaining)} за подписку на канал.")
     else:
-        bot.send_message(chat_id, f"Подпишитесь на {CHANNEL_USERNAME}, чтобы получать {SUBSCRIPTION_REWARD} $Daice!")
+        bot.send_message(chat_id, f"Подпишитесь на @{CHANNEL_USERNAME}, чтобы получать {SUBSCRIPTION_REWARD} $Daice!")
 
 def is_user_subscribed(chat_id):
     try:
-        chat_member = bot.get_chat_member(chat_id=f"@{CHANNEL_USERNAME}", user_id=chat_id)
-        return chat_member.status in [ChatMemberStatus.MEMBER, ChatMemberStatus.ADMINISTRATOR, ChatMemberStatus.CREATOR]
+        response = requests.get(f"https://api.telegram.org/bot{TOKEN}/getChatMember?chat_id=@{CHANNEL_USERNAME}&user_id={chat_id}")
+        member_status = response.json()["result"]["status"]
+        return member_status in ["member", "administrator", "creator"]
     except Exception as e:
         print(f"Ошибка при проверке подписки: {e}")
         return False
