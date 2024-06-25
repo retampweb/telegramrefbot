@@ -85,7 +85,7 @@ def show_dashboard(chat_id):
             time_remaining = CHECK_INTERVAL - time_since_last_check
             dashboard_info += f"Вы сможете получить {SUBSCRIPTION_REWARD} $Daice через {format_time(time_remaining)} за подписку на канал."
     else:
-        dashboard_info += f"Подпишитесь на https://t.me/{CHANNEL_USERNAME}, чтобы получать {SUBSCRIPTION_REWARD} $Daice!"
+        dashboard_info += f"Подпишитесь на {CHANNEL_USERNAME}, чтобы получать {SUBSCRIPTION_REWARD} $Daice!"
     
     bot.send_message(chat_id, dashboard_info)
 
@@ -102,7 +102,7 @@ def get_subscription_reward(chat_id):
             time_remaining = CHECK_INTERVAL - time_since_last_check
             bot.send_message(chat_id, f"Вы сможете получить еще {SUBSCRIPTION_REWARD} $Daice через {format_time(time_remaining)} за подписку на канал.")
     else:
-        bot.send_message(chat_id, f"Подпишитесь на https://t.me/{CHANNEL_USERNAME}, чтобы получать {SUBSCRIPTION_REWARD} $Daice!")
+        bot.send_message(chat_id, f"Подпишитесь на {CHANNEL_USERNAME}, чтобы получать {SUBSCRIPTION_REWARD} $Daice!")
 
 def is_user_subscribed(chat_id):
     try:
