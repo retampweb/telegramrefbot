@@ -1,14 +1,15 @@
 import telebot
 from telebot import types
+from collections import defaultdict
 
 # Токен бота
-TOKEN = '7205134080:AAElGKDakWGR3upcttIiDytEt5XVFvPC2s4'
+TOKEN = 'YOUR_BOT_TOKEN'
 
 # Создание экземпляра бота
 bot = telebot.TeleBot(TOKEN)
 
 # Словарь для хранения данных пользователей
-users = {}
+users = defaultdict(lambda: {'income': 1, 'referrals': {}, 'staked': 0})
 
 # Функция для начала работы с ботом
 @bot.message_handler(commands=['start'])
@@ -25,8 +26,10 @@ def start(message):
     # Приветственное сообщение
     bot.send_message(chat_id, "Добро пожаловать в бот $CONE! Выберите действие:", reply_markup=markup)
     
-    # Инициализация данных пользователя
-    users[chat_id] = {'income': 1, 'referrals': [], 'staked': 0}
+    # Обработка реферальной ссылки
+    ref_code = message.text.split()[1] if len(message.text.split()) > 1 else None
+    if ref_code and ref_code in users:
+        add_referral(chat_id, ref_code)
 
 # Обработка нажатий на кнопки
 @bot.message_handler(content_types=['text'])
@@ -35,48 +38,62 @@ def handle_text(message):
     text = message.text
     
     if text == "Профиль":
-        # Вывод информации о профиле пользователя
-        profile_info = f"Ваш доход: {users[chat_id]['income']} $CONE в час\n"
-        profile_info += f"Количество рефералов: {len(users[chat_id]['referrals'])}\n"
-        profile_info += f"Заблокировано монет: {users[chat_id]['staked']} $CONE"
-        bot.send_message(chat_id, profile_info)
+        show_profile(chat_id)
     
     elif text == "Реферальная программа":
-        # Вывод реферальной ссылки
-        ref_link = f"https://t.me/coincone_bot?start={chat_id}"
-        bot.send_message(chat_id, f"Ваша реферальная ссылка: {ref_link}")
+        show_referral_link(chat_id)
     
     elif text == "Стейкинг":
-        # Обработка стейкинга монет
-        stake_amount = int(input("Введите количество монет для стейкинга: "))
+        process_staking(chat_id)
+
+def show_profile(chat_id):
+    # Вывод информации о профиле пользователя
+    profile_info = f"Ваш доход: {users[chat_id]['income']} $CONE в час\n"
+    profile_info += f"Количество рефералов: {sum(len(level) for level in users[chat_id]['referrals'].values())}\n"
+    profile_info += f"Заблокировано монет: {users[chat_id]['staked']} $CONE"
+    bot.send_message(chat_id, profile_info)
+
+def show_referral_link(chat_id):
+    # Вывод реферальной ссылки
+    ref_link = f"https://t.me/YourBotName?start={chat_id}"
+    bot.send_message(chat_id, f"Ваша реферальная ссылка: {ref_link}")
+
+def process_staking(chat_id):
+    # Обработка стейкинга монет
+    msg = bot.send_message(chat_id, "Введите количество монет для стейкинга:")
+    bot.register_next_step_handler(msg, do_staking)
+
+def do_staking(message):
+    chat_id = message.chat.id
+    try:
+        stake_amount = int(message.text)
         if stake_amount <= users[chat_id]['income']:
             users[chat_id]['income'] -= stake_amount
             users[chat_id]['staked'] += stake_amount
             bot.send_message(chat_id, f"Вы заблокировали {stake_amount} $CONE для стейкинга.")
         else:
             bot.send_message(chat_id, "Недостаточно монет для стейкинга.")
+    except ValueError:
+        bot.send_message(chat_id, "Некорректное значение. Введите целое число.")
 
-# Обработка реферальных ссылок
-@bot.message_handler(commands=['start'])
-def handle_referral(message):
-    chat_id = message.chat.id
-    
-    # Получение реферального кода из ссылки
-    ref_code = message.text.split()[1]
-    
+def add_referral(chat_id, ref_code):
     # Добавление реферала к рефереру
-    if ref_code in users:
-        users[ref_code]['referrals'].append(chat_id)
+    level = 0
+    parent = ref_code
+    while level < 23:
+        if parent not in users[parent]['referrals']:
+            users[parent]['referrals'][parent] = []
+        users[parent]['referrals'][parent].append(chat_id)
+        parent = users[parent]['referrals'][parent][0]
         
-        # Увеличение дохода реферера
-        income_increase = users[ref_code]['income'] * 0.1
-        users[ref_code]['income'] += income_increase
+        # Увеличение дохода реферера в зависимости от уровня
+        income_increase = users[chat_id]['income'] * (0.01 + 0.0017 * level)
+        users[parent]['income'] += income_increase
         
-        # Приветственное сообщение для реферала
-        bot.send_message(chat_id, f"Вы успешно присоединились к реферальной программе! Ваш доход: {users[chat_id]['income']} $CONE в час.")
+        level += 1
     
-    # Инициализация данных нового пользователя
-    users[chat_id] = {'income': 1, 'referrals': [], 'staked': 0}
+    # Приветственное сообщение для реферала
+    bot.send_message(chat_id, f"Вы успешно присоединились к реферальной программе! Ваш доход: {users[chat_id]['income']} $CONE в час.")
 
 # Запуск бота
 bot.polling()
