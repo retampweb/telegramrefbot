@@ -72,7 +72,7 @@ def show_dashboard(chat_id):
     dashboard_info += f"Заблокировано монет: {users[chat_id]['staked']} $Daice\n"
     dashboard_info += f"Доход от рефералов: {users[chat_id]['total_referral_income']} $Daice\n"
     dashboard_info += f"Ежедневный доход от стейкинга: {users[chat_id]['staked'] * 0.05} $Daice\n"
-    dashboard_info += f"Количество рефералов: {sum(len(level) for level in users[chat_id]['referrals'].values())}\n\n"
+    dashboard_info += f"Количество рефералов: {len(get_all_referrals(chat_id))}\n\n"
     
     # Проверка подписки на канал
     if is_user_subscribed(chat_id):
@@ -85,7 +85,7 @@ def show_dashboard(chat_id):
             time_remaining = CHECK_INTERVAL - time_since_last_check
             dashboard_info += f"Вы сможете получить {SUBSCRIPTION_REWARD} $Daice через {format_time(time_remaining)} за подписку на канал."
     else:
-        dashboard_info += f"Подпишитесь на {CHANNEL_USERNAME}, чтобы получать {SUBSCRIPTION_REWARD} $Daice!"
+        dashboard_info += f"Подпишитесь на https://t.me/{CHANNEL_USERNAME}, чтобы получать {SUBSCRIPTION_REWARD} $Daice!"
     
     bot.send_message(chat_id, dashboard_info)
 
@@ -102,7 +102,7 @@ def get_subscription_reward(chat_id):
             time_remaining = CHECK_INTERVAL - time_since_last_check
             bot.send_message(chat_id, f"Вы сможете получить еще {SUBSCRIPTION_REWARD} $Daice через {format_time(time_remaining)} за подписку на канал.")
     else:
-        bot.send_message(chat_id, f"Подпишитесь на {CHANNEL_USERNAME}, чтобы получать {SUBSCRIPTION_REWARD} $Daice!")
+        bot.send_message(chat_id, f"Подпишитесь на https://t.me/{CHANNEL_USERNAME}, чтобы получать {SUBSCRIPTION_REWARD} $Daice!")
 
 def is_user_subscribed(chat_id):
     try:
@@ -150,8 +150,14 @@ def add_referral(chat_id, ref_code):
     bot.send_message(chat_id, f"Вы успешно присоединились к реферальной программе Dark Ice Project! Ваш доход: {users[chat_id]['income']} $Daice в час.")
     
     # Сообщение для реферера о новом реферале
-    ref_count = sum(len(level) for level in users[ref_code]['referrals'].values())
+    ref_count = len(get_all_referrals(ref_code))
     bot.send_message(ref_code, f"Поздравляем! У вас появился новый реферал. Теперь у вас {ref_count} рефералов.")
+
+def get_all_referrals(chat_id):
+    referrals = []
+    for level in users[chat_id]['referrals'].values():
+        referrals.extend(level)
+    return referrals
 
 def process_staking(chat_id):
     # Обработка стейкинга монет
