@@ -2,9 +2,8 @@ import telebot
 from telebot import types
 from collections import defaultdict
 from operator import itemgetter
-import re
-import requests
 import time
+from telegram import Chat, ChatMember, ChatMemberStatus
 
 # Токен бота
 TOKEN = '7272910298:AAFFNc7MqBl-TXDOWK9fXTABwlhCM1_DVuc'
@@ -84,7 +83,7 @@ def show_dashboard(chat_id):
     # Проверка подписки на канал
     if is_user_subscribed(chat_id):
         last_check = users[chat_id]['last_subscription_check']
-        time_since_last_check = message.date - last_check
+        time_since_last_check = time.time() - last_check
         
         if time_since_last_check >= CHECK_INTERVAL:
             dashboard_info += f"Вы можете получить {SUBSCRIPTION_REWARD} $Daice за подписку на канал!"
@@ -113,19 +112,16 @@ def get_subscription_reward(chat_id):
 
 def is_user_subscribed(chat_id):
     try:
-        response = requests.get(f"https://api.telegram.org/bot{TOKEN}/getChatMember?chat_id=@{CHANNEL_USERNAME}&user_id={chat_id}")
-        member_status = response.json()["result"]["status"]
-        return member_status in ["member", "administrator", "creator"]
-    except:
+        chat_member = bot.get_chat_member(chat_id=f"@{CHANNEL_USERNAME}", user_id=chat_id)
+        return chat_member.status in [ChatMemberStatus.MEMBER, ChatMemberStatus.ADMINISTRATOR, ChatMemberStatus.CREATOR]
+    except Exception as e:
+        print(f"Ошибка при проверке подписки: {e}")
         return False
 
 def format_time(seconds):
     days = seconds // (24 * 60 * 60)
-    seconds -= days * (24 * 60 * 60)
-    hours = seconds // (60 * 60)
-    seconds -= hours * (60 * 60)
-    minutes = seconds // 60
-    seconds -= minutes * 60
+    hours = (seconds // (60 * 60)) % 24
+    minutes = (seconds // 60) % 60
     
     time_parts = []
     if days > 0:
@@ -134,8 +130,6 @@ def format_time(seconds):
         time_parts.append(f"{hours}ч")
     if minutes > 0:
         time_parts.append(f"{minutes}м")
-    if seconds > 0:
-        time_parts.append(f"{seconds}с")
     
     return " ".join(time_parts)
 
