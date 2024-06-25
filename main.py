@@ -1,6 +1,3 @@
-Вот полный код бота с исправленными ошибками и оптимизацией:
-
-```python
 import telebot
 from telebot import types
 from collections import defaultdict
